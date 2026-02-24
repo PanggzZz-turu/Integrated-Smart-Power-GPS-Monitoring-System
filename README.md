@@ -167,7 +167,7 @@ PubSubClient      by Nick O'Leary
 ```
 
 **Langkah:**
-1. Buka `firmware/wattscope_esp32.ino` di Arduino IDE
+1. Buka `main.cpp` di Arduino IDE
 2. Sesuaikan kredensial WiFi fallback jika diperlukan:
    ```cpp
    const char* wifi_ssid     = "NAMA_WIFI_ANDA";
