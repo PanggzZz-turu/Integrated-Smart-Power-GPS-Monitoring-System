@@ -35,10 +35,9 @@
 ---
 
 ## 🔍 Gambaran Umum
-
-WATTSCOPE adalah sistem monitoring energi terbarukan yang dirancang untuk memantau performa **Panel Surya** dan **Turbin Angin** secara real-time. Data dikirim dari perangkat ESP32 ke cloud menggunakan protokol MQTT, lalu divisualisasikan melalui web dashboard yang responsif.
-
-Sistem ini juga dilengkapi fitur **GPS tracking** untuk mengetahui lokasi perangkat secara real-time, serta **sensor keamanan** berbasis magnet untuk mendeteksi potensi pencurian.
+Proyek Integrated Smart Power & GPS Monitoring System ini bertujuan untuk menghadirkan solusi terpadu dalam pemantauan daya sekaligus peningkatan keamanan pada sistem energi terdistribusi. Sistem ini menggabungkan sensor daya untuk membaca arus, tegangan, serta estimasi konsumsi energi secara real-time, kemudian mengirimkan data tersebut ke platform monitoring berbasis IoT.
+Untuk aspek keamanan, perangkat dilengkapi modul GPS yang memungkinkan pelacakan lokasi secara kontinu sehingga mencegah pencurian atau pemindahan aset tanpa izin. Informasi daya, status keamanan, dan posisi perangkat divisualisasikan secara terpusat sehingga memudahkan pengguna dalam melakukan pengawasan, analisis performa, serta respons cepat terhadap potensi gangguan.
+Dengan integrasi ini, menghadirkan sistem energi yang lebih aman, efisien, dan mudah dikelola — mulai dari pemantauan performa Panel Surya dan Turbin Angin, hingga deteksi anomali keamanan berbasis sensor magnet secara real-time.
 
 ---
 
