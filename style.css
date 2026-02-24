@@ -1,0 +1,659 @@
+/* ========================================
+   WATTSCOPE Dashboard - Mobile Optimized
+   Fixed for Standard Phone (375-414px)
+   ======================================== */
+
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    min-height: 100vh;
+}
+
+/* ========================================
+   Navigation Bar
+   ======================================== */
+nav {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-bottom: 3px solid;
+    border-image: linear-gradient(90deg, #0FD9BF 0%, #0FD9BF 100%) 1;
+    padding: 12px 16px;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #FF4800 0%, #FFB800 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(255, 72, 0, 0.3);
+}
+
+.brand-name {
+    font-size: 18px;
+    font-weight: bold;
+    background: linear-gradient(135deg, #0FD9BF 0%, #0FD9BF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1.5px;
+}
+
+/* Status Indicator - Default Offline/Connecting State */
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #fee2e2;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.status-text {
+    color: #991b1b;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* Navigation Menu */
+.nav-menu {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.nav-item {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: transparent;
+    color: #374151;
+}
+
+.nav-item:hover {
+    background: #f3f4f6;
+}
+
+.nav-item:active {
+    transform: scale(0.95);
+}
+
+.nav-item.active {
+    background: linear-gradient(135deg, #0FD9BF 0%, #0FD9BF 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(15, 217, 191, 0.3);
+}
+
+/* ========================================
+   Panel Section - 2 KOLOM TETAP
+   ======================================== */
+.panel-section {
+    padding: 20px 12px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.panel-card {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.panel-card:active {
+    transform: scale(0.98);
+}
+
+.solar-card {
+    background: linear-gradient(135deg, #0FD9BF 0%, #0cc4ab 100%);
+}
+
+.turbine-card {
+    background: linear-gradient(135deg, #FF4800 0%, #FFB800 100%);
+}
+
+.panel-header {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.panel-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 6px;
+}
+
+.panel-divider {
+    width: 48px;
+    height: 3px;
+    background: white;
+    margin: 0 auto;
+    border-radius: 2px;
+}
+
+.panel-image {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    height: 80px;
+}
+
+.panel-data {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    margin-bottom: 8px;
+}
+
+.data-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.data-label {
+    color: #374151;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.data-value {
+    color: #0FD9BF;
+    font-weight: bold;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    transition: transform 0.3s ease;
+}
+
+/* ========================================
+   Chart Section
+   ======================================== */
+.chart-section {
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.chart-card {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chart-header {
+    width: 100%;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.chart-title {
+    font-size: 16px;
+    font-weight: bold;
+    background: linear-gradient(135deg, #0FD9BF 0%, #FF4800 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.chart-area {
+    width: 100%;
+    height: 200px;
+    background: rgba(249, 250, 251, 0.5);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-area canvas {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.chart-controls {
+    width: 100%;
+    height: auto;
+    background: rgba(249, 250, 251, 0.8);
+    border-radius: 8px;
+    padding: 8px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.chart-btn {
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+    color: #374151;
+    padding: 10px;
+    min-height: 36px;
+}
+
+.chart-btn:hover {
+    border-color: #0FD9BF;
+    background: #f0fdfa;
+}
+
+.chart-btn:active {
+    transform: scale(0.95);
+}
+
+.chart-btn.active {
+    background: linear-gradient(135deg, #FF4800 0%, #FFB800 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(255, 72, 0, 0.3);
+}
+
+/* ========================================
+   Map Section
+   ======================================== */
+.map-section {
+    padding: 20px 12px;
+    display: flex;
+    justify-content: center;
+}
+
+.map-container {
+    width: 100%;
+    height: 350px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    position: relative;
+}
+
+.map-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 12px 16px;
+    border-bottom: 2px solid #0FD9BF;
+    z-index: 500;
+}
+
+.map-title {
+    font-size: 16px;
+    font-weight: bold;
+    background: linear-gradient(135deg, #0FD9BF 0%, #0FD9BF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.map-area {
+    width: 100%;
+    height: 100%;
+    background: #e5e7eb;
+}
+
+/* Leaflet Map Override */
+#map {
+    height: 100%;
+    width: 100%;
+}
+
+/* Coordinates Display */
+.coordinates {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 500;
+}
+
+.coordinates-label {
+    font-size: 9px;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.coordinates-value {
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    color: #0FD9BF;
+    margin-top: 2px;
+}
+
+/* Custom Leaflet Marker */
+.custom-marker {
+    background: none;
+    border: none;
+}
+
+/* ========================================
+   Log Section
+   ======================================== */
+.log-section {
+    padding: 20px 12px;
+    display: flex;
+    justify-content: center;
+}
+
+.log-container {
+    width: 100%;
+    height: 400px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.log-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #0FD9BF;
+}
+
+.log-title {
+    font-size: 16px;
+    font-weight: bold;
+    background: linear-gradient(135deg, #0FD9BF 0%, #0FD9BF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.log-content {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 4px;
+}
+
+.log-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px;
+    background: #f9fafb;
+    border-left: 3px solid transparent;
+    border-radius: 6px;
+    transition: all 0.2s;
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: fadeInLog 0.3s ease forwards;
+}
+
+@keyframes fadeInLog {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.log-entry:hover {
+    background: #f3f4f6;
+    border-left-color: #0FD9BF;
+}
+
+.log-time {
+    font-size: 10px;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.log-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.log-dot.green {
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+}
+
+.log-dot.yellow {
+    background: #eab308;
+    box-shadow: 0 0 8px rgba(234, 179, 8, 0.5);
+}
+
+.log-dot.blue {
+    background: #3b82f6;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+}
+
+.log-dot.red {
+    background: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+.log-message {
+    font-size: 11px;
+    color: #374151;
+    line-height: 1.4;
+}
+
+/* Log Footer */
+.log-footer {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.log-count {
+    font-size: 10px;
+    color: #6b7280;
+    font-weight: 500;
+    text-align: center;
+}
+
+.log-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.log-btn {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.log-btn.primary {
+    background: linear-gradient(135deg, #0FD9BF 0%, #0cc4ab 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 2px 8px rgba(15, 217, 191, 0.3);
+}
+
+.log-btn.primary:hover {
+    box-shadow: 0 4px 12px rgba(15, 217, 191, 0.4);
+    transform: translateY(-2px);
+}
+
+.log-btn.primary:active {
+    transform: translateY(0) scale(0.95);
+}
+
+.log-btn.secondary {
+    background: white;
+    color: #0FD9BF;
+    border: 2px solid #0FD9BF;
+}
+
+.log-btn.secondary:hover {
+    background: #f0fdfa;
+}
+
+.log-btn.secondary:active {
+    transform: scale(0.95);
+}
+
+/* ========================================
+   Footer Spacing
+   ======================================== */
+.footer-spacing {
+    padding-bottom: 40px;
+}
+
+/* ========================================
+   Scrollbar Styling
+   ======================================== */
+.log-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.log-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.log-content::-webkit-scrollbar-thumb {
+    background: #0FD9BF;
+    border-radius: 10px;
+}
+
+.log-content::-webkit-scrollbar-thumb:hover {
+    background: #0cc4ab;
+}
+
+/* ========================================
+   Responsive Design (Tablet & Desktop)
+   ======================================== */
+@media (min-width: 768px) {
+    .panel-section {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .chart-section {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .map-section,
+    .log-section {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .map-container {
+        height: 450px;
+    }
+    
+    .log-container {
+        height: 500px;
+    }
+    
+    nav {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 16px 24px;
+    }
+    
+    .nav-menu {
+        gap: 8px;
+    }
+}

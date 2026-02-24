@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WATTSCOPE - Energy Monitoring Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo-section">
+            <div class="logo">W</div>
+            <h1 class="brand-name">WATTSCOPE</h1>
+        </div>
+
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span class="status-text">Status: Connecting...</span>
+        </div>
+
+        <div class="nav-menu">
+            <button class="nav-item active" data-menu="panel">📊 Panel</button>
+            <button class="nav-item" data-menu="grafik">📈 Grafik</button>
+            <button class="nav-item" data-menu="history">📍 GPS</button>
+            <button class="nav-item" data-menu="alarm">📋 Log</button>
+        </div>
+    </nav>
+
+    <!-- Panel Section -->
+    <div class="panel-section">
+        <div class="panel-card solar-card">
+            <div class="panel-header">
+                <h2 class="panel-title">☀️ Panel Surya</h2>
+                <div class="panel-divider"></div>
+            </div>
+            <div class="panel-image">
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="15" y="25" width="50" height="35" fill="white" opacity="0.3" rx="4" stroke="white" stroke-width="2"/>
+                    <line x1="40" y1="25" x2="40" y2="60" stroke="white" stroke-width="2"/>
+                    <line x1="15" y1="42.5" x2="65" y2="42.5" stroke="white" stroke-width="2"/>
+                    <circle cx="40" cy="15" r="6" fill="white" opacity="0.8"/>
+                    <line x1="32" y1="12" x2="28" y2="8" stroke="white" stroke-width="2"/>
+                    <line x1="48" y1="12" x2="52" y2="8" stroke="white" stroke-width="2"/>
+                    <line x1="26" y1="18" x2="22" y2="18" stroke="white" stroke-width="2"/>
+                    <line x1="54" y1="18" x2="58" y2="18" stroke="white" stroke-width="2"/>
+                    <rect x="38" y="60" width="4" height="8" fill="white" opacity="0.6"/>
+                </svg>
+            </div>
+            <div class="panel-data">
+                <div class="data-row">
+                    <span class="data-label">⚡ Tegangan</span>
+                    <span class="data-value" id="solar-voltage">0.00 V</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">🔌 Ampere</span>
+                    <span class="data-value" id="solar-ampere">0.00 A</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">💡 Daya</span>
+                    <span class="data-value" id="solar-power">0.00 W</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-card turbine-card">
+            <div class="panel-header">
+                <h2 class="panel-title">💨 Turbin Angin</h2>
+                <div class="panel-divider"></div>
+            </div>
+            <div class="panel-image">
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="40" cy="35" r="6" fill="white"/>
+                    <ellipse cx="40" cy="18" rx="8" ry="14" fill="white" opacity="0.8" transform="rotate(0 40 35)"/>
+                    <ellipse cx="53" cy="41" rx="8" ry="14" fill="white" opacity="0.7" transform="rotate(120 40 35)"/>
+                    <ellipse cx="27" cy="41" rx="8" ry="14" fill="white" opacity="0.6" transform="rotate(240 40 35)"/>
+                    <rect x="37" y="41" width="6" height="25" fill="white" opacity="0.8" rx="1"/>
+                    <rect x="30" y="64" width="20" height="4" fill="white" opacity="0.6" rx="2"/>
+                </svg>
+            </div>
+            <div class="panel-data">
+                <div class="data-row">
+                    <span class="data-label">⚡ Tegangan</span>
+                    <span class="data-value" id="turbine-voltage">0.00 V</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">🔌 Ampere</span>
+                    <span class="data-value" id="turbine-ampere">0.00 A</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">💡 Daya</span>
+                    <span class="data-value" id="turbine-power">0.00 W</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="chart-section">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h2 class="chart-title">☀️ Grafik Panel Surya</h2>
+            </div>
+            <div class="chart-area">
+                <canvas id="solar-chart"></canvas>
+            </div>
+            <div class="chart-controls">
+                <button class="chart-btn active" data-chart="tegangan" data-type="solar">Tegangan</button>
+                <button class="chart-btn" data-chart="ampere" data-type="solar">Ampere</button>
+                <button class="chart-btn" data-chart="daya" data-type="solar">Daya</button>
+                <button class="chart-btn" data-chart="multi" data-type="solar">Multi</button>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <h2 class="chart-title">💨 Grafik Turbin Angin</h2>
+            </div>
+            <div class="chart-area">
+                <canvas id="turbine-chart"></canvas>
+            </div>
+            <div class="chart-controls">
+                <button class="chart-btn active" data-chart="tegangan" data-type="turbine">Tegangan</button>
+                <button class="chart-btn" data-chart="ampere" data-type="turbine">Ampere</button>
+                <button class="chart-btn" data-chart="daya" data-type="turbine">Daya</button>
+                <button class="chart-btn" data-chart="multi" data-type="turbine">Multi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Section -->
+    <div class="map-section">
+        <div class="map-container">
+            <div class="map-header">
+                <h2 class="map-title">📍 Lokasi GPS Real-time</h2>
+            </div>
+            <div id="map" class="map-area"></div>
+            <div class="coordinates">
+                <div class="coordinates-label">Koordinat</div>
+                <div class="coordinates-value">-7.2575° S, 112.7521° E</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Section -->
+    <div class="log-section">
+        <div class="log-container">
+            <div class="log-header">
+                <h2 class="log-title">📋 Log Data Sistem</h2>
+            </div>
+            <div class="log-content">
+                <!-- Log entries will be dynamically added by JavaScript -->
+            </div>
+            <div class="log-footer">
+                <span class="log-count">Total Logs: 0 entries</span>
+                <div class="log-actions">
+                    <button class="log-btn primary">🔄 Refresh</button>
+                    <button class="log-btn secondary">💾 Export</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-spacing"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Chart.js Library CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Main JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
