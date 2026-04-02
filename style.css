@@ -1,9 +1,4 @@
-/* ========================================
-   WATTSCOPE Dashboard - Mobile Optimized
-   Fixed for Standard Phone (375-414px)
-   ======================================== */
 
-/* Reset & Base Styles */
 * {
     margin: 0;
     padding: 0;
@@ -16,9 +11,6 @@ body {
     min-height: 100vh;
 }
 
-/* ========================================
-   Navigation Bar
-   ======================================== */
 nav {
     height: auto;
     display: flex;
@@ -65,7 +57,6 @@ nav {
     letter-spacing: 1.5px;
 }
 
-/* Status Indicator - Default Offline/Connecting State */
 .status-indicator {
     display: flex;
     align-items: center;
@@ -99,7 +90,6 @@ nav {
     font-size: 12px;
 }
 
-/* Navigation Menu */
 .nav-menu {
     display: flex;
     gap: 6px;
@@ -233,9 +223,6 @@ nav {
     transition: transform 0.3s ease;
 }
 
-/* ========================================
-   Chart Section
-   ======================================== */
 .chart-section {
     padding: 20px 12px;
     display: flex;
@@ -328,9 +315,6 @@ nav {
     box-shadow: 0 4px 12px rgba(255, 72, 0, 0.3);
 }
 
-/* ========================================
-   Map Section
-   ======================================== */
 .map-section {
     padding: 20px 12px;
     display: flex;
@@ -380,7 +364,6 @@ nav {
     width: 100%;
 }
 
-/* Coordinates Display */
 .coordinates {
     position: absolute;
     bottom: 16px;
@@ -409,15 +392,11 @@ nav {
     margin-top: 2px;
 }
 
-/* Custom Leaflet Marker */
 .custom-marker {
     background: none;
     border: none;
 }
 
-/* ========================================
-   Log Section
-   ======================================== */
 .log-section {
     padding: 20px 12px;
     display: flex;
@@ -528,7 +507,6 @@ nav {
     line-height: 1.4;
 }
 
-/* Log Footer */
 .log-footer {
     margin-top: 12px;
     padding-top: 10px;
@@ -590,16 +568,10 @@ nav {
     transform: scale(0.95);
 }
 
-/* ========================================
-   Footer Spacing
-   ======================================== */
 .footer-spacing {
     padding-bottom: 40px;
 }
 
-/* ========================================
-   Scrollbar Styling
-   ======================================== */
 .log-content::-webkit-scrollbar {
     width: 6px;
 }
@@ -618,9 +590,6 @@ nav {
     background: #0cc4ab;
 }
 
-/* ========================================
-   Responsive Design (Tablet & Desktop)
-   ======================================== */
 @media (min-width: 768px) {
     .panel-section {
         grid-template-columns: repeat(2, 1fr);
