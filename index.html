@@ -1,178 +1,353 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WATTSCOPE - Energy Monitoring Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PowerTrack by Terangin</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="logo-section">
-            <div class="logo">W</div>
-            <h1 class="brand-name">WATTSCOPE</h1>
-        </div>
 
-        <div class="status-indicator">
-            <div class="status-dot"></div>
-            <span class="status-text">Status: Connecting...</span>
-        </div>
+<!-- ══════════════════════════════
+     PAGE 1: LOGIN
+══════════════════════════════ -->
+<div id="page-login" class="page active">
+  <div class="login-grid-bg"></div>
+  <div class="login-card">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <button class="theme-toggle" onclick="toggleTheme()" title="Ganti tema">
+        <span class="icon-moon">🌙</span>
+        <span class="icon-sun">☀️</span>
+      </button>
+    </div>
+    <div class="login-brand">
+      <div class="login-logo">
+        <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="15" cy="13" r="3" fill="white"/>
+          <ellipse cx="15" cy="4" rx="4" ry="8" fill="white" opacity="0.9"/>
+          <ellipse cx="22" cy="18" rx="4" ry="8" fill="white" opacity="0.75" transform="rotate(120 15 13)"/>
+          <ellipse cx="8" cy="18" rx="4" ry="8" fill="white" opacity="0.6" transform="rotate(240 15 13)"/>
+          <rect x="13.5" y="16" width="3" height="10" fill="white" opacity="0.85" rx="1"/>
+          <rect x="9" y="25" width="12" height="3" fill="white" opacity="0.5" rx="1.5"/>
+        </svg>
+      </div>
+      <div class="login-title">PowerTrack</div>
+      <div class="login-subtitle">by Terangin</div>
+    </div>
+    <div class="login-form">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="login-user" placeholder="masukkan username" autocomplete="off"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-pass" placeholder="••••••••"/>
+      </div>
+      <button class="btn-login" id="btn-login">Masuk</button>
+    </div>
+    <div class="login-error" id="login-error">Username atau password salah.</div>
+  </div>
+</div>
 
-        <div class="nav-menu">
-            <button class="nav-item active" data-menu="panel">📊 Panel</button>
-            <button class="nav-item" data-menu="grafik">📈 Grafik</button>
-            <button class="nav-item" data-menu="history">📍 GPS</button>
-            <button class="nav-item" data-menu="alarm">📋 Log</button>
-        </div>
-    </nav>
+<!-- ══════════════════════════════
+     PAGE 2: DEVICE SELECTOR
+══════════════════════════════ -->
+<div id="page-devices" class="page">
+  <div class="dev-header">
+    <div class="dev-brand">
+      <div class="dev-logo">
+        <svg viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="9" r="2" fill="white"/>
+          <ellipse cx="10" cy="3" rx="2.5" ry="5" fill="white" opacity="0.9"/>
+          <ellipse cx="15" cy="12" rx="2.5" ry="5" fill="white" opacity="0.75" transform="rotate(120 10 9)"/>
+          <ellipse cx="5" cy="12" rx="2.5" ry="5" fill="white" opacity="0.6" transform="rotate(240 10 9)"/>
+          <rect x="9" y="11" width="2" height="6" fill="white" opacity="0.8" rx="0.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="dev-brand-name">PowerTrack</div>
+        <div class="dev-brand-sub">by Terangin</div>
+      </div>
+    </div>
+    <div class="badge-connected">
+      <div class="dot-green"></div>
+      <span>Terhubung</span>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Ganti tema" style="margin-left:8px;">
+      <span class="icon-moon">🌙</span>
+      <span class="icon-sun">☀️</span>
+    </button>
+  </div>
 
-    <!-- Panel Section -->
-    <div class="panel-section">
-        <div class="panel-card solar-card">
-            <div class="panel-header">
-                <h2 class="panel-title">☀️ Panel Surya</h2>
-                <div class="panel-divider"></div>
-            </div>
-            <div class="panel-image">
-                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="15" y="25" width="50" height="35" fill="white" opacity="0.3" rx="4" stroke="white" stroke-width="2"/>
-                    <line x1="40" y1="25" x2="40" y2="60" stroke="white" stroke-width="2"/>
-                    <line x1="15" y1="42.5" x2="65" y2="42.5" stroke="white" stroke-width="2"/>
-                    <circle cx="40" cy="15" r="6" fill="white" opacity="0.8"/>
-                    <line x1="32" y1="12" x2="28" y2="8" stroke="white" stroke-width="2"/>
-                    <line x1="48" y1="12" x2="52" y2="8" stroke="white" stroke-width="2"/>
-                    <line x1="26" y1="18" x2="22" y2="18" stroke="white" stroke-width="2"/>
-                    <line x1="54" y1="18" x2="58" y2="18" stroke="white" stroke-width="2"/>
-                    <rect x="38" y="60" width="4" height="8" fill="white" opacity="0.6"/>
-                </svg>
-            </div>
-            <div class="panel-data">
-                <div class="data-row">
-                    <span class="data-label">⚡ Tegangan</span>
-                    <span class="data-value" id="solar-voltage">0.00 V</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">🔌 Ampere</span>
-                    <span class="data-value" id="solar-ampere">0.00 A</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">💡 Daya</span>
-                    <span class="data-value" id="solar-power">0.00 W</span>
-                </div>
-            </div>
-        </div>
+  <div class="dev-body">
+    <div class="dev-section-title">Pilih Device</div>
+    <div class="dev-section-sub" id="dev-topic-label">wattscope/— mendeteksi...</div>
+    <div class="dev-scanning">
+      <div class="scan-dot"></div>
+      <div class="scan-dot"></div>
+      <div class="scan-dot"></div>
+      <span>Memindai device aktif</span>
+    </div>
+    <div class="device-list" id="device-list"></div>
+    <button class="btn-monitor" id="btn-monitor">Monitor Device →</button>
+  </div>
+  <button class="btn-logout" id="btn-logout">← Keluar / Ganti Akun</button>
+</div>
 
-        <div class="panel-card turbine-card">
-            <div class="panel-header">
-                <h2 class="panel-title">💨 Turbin Angin</h2>
-                <div class="panel-divider"></div>
-            </div>
-            <div class="panel-image">
-                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="40" cy="35" r="6" fill="white"/>
-                    <ellipse cx="40" cy="18" rx="8" ry="14" fill="white" opacity="0.8" transform="rotate(0 40 35)"/>
-                    <ellipse cx="53" cy="41" rx="8" ry="14" fill="white" opacity="0.7" transform="rotate(120 40 35)"/>
-                    <ellipse cx="27" cy="41" rx="8" ry="14" fill="white" opacity="0.6" transform="rotate(240 40 35)"/>
-                    <rect x="37" y="41" width="6" height="25" fill="white" opacity="0.8" rx="1"/>
-                    <rect x="30" y="64" width="20" height="4" fill="white" opacity="0.6" rx="2"/>
-                </svg>
-            </div>
-            <div class="panel-data">
-                <div class="data-row">
-                    <span class="data-label">⚡ Tegangan</span>
-                    <span class="data-value" id="turbine-voltage">0.00 V</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">🔌 Ampere</span>
-                    <span class="data-value" id="turbine-ampere">0.00 A</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">💡 Daya</span>
-                    <span class="data-value" id="turbine-power">0.00 W</span>
-                </div>
-            </div>
+<!-- ══════════════════════════════
+     PAGE 3: DASHBOARD
+══════════════════════════════ -->
+<div id="page-dashboard" class="page">
+  <nav>
+    <div class="nav-top">
+      <div class="nav-brand">
+        <div class="nav-logo">
+          <svg viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="9" r="2" fill="white"/>
+            <ellipse cx="10" cy="3" rx="2.5" ry="5" fill="white" opacity="0.9"/>
+            <ellipse cx="15" cy="12" rx="2.5" ry="5" fill="white" opacity="0.75" transform="rotate(120 10 9)"/>
+            <ellipse cx="5" cy="12" rx="2.5" ry="5" fill="white" opacity="0.6" transform="rotate(240 10 9)"/>
+            <rect x="9" y="11" width="2" height="6" fill="white" opacity="0.8" rx="0.5"/>
+          </svg>
         </div>
+        <div>
+          <div class="nav-title">PowerTrack</div>
+          <div class="nav-by">by Terangin</div>
+        </div>
+      </div>
+      <div class="nav-status">
+        <div class="dot-green"></div>
+        <span>Online</span>
+      </div>
+      <button class="alarm-bell" id="alarm-bell" onclick="openAlarmPanel()" title="Alarm gerak">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="alarm-badge" id="alarm-badge">0</span>
+      </button>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Ganti tema" style="margin-left:8px;">
+        <span class="icon-moon">🌙</span>
+        <span class="icon-sun">☀️</span>
+      </button>
     </div>
 
-    <!-- Chart Section -->
-    <div class="chart-section">
-        <div class="chart-card">
-            <div class="chart-header">
-                <h2 class="chart-title">☀️ Grafik Panel Surya</h2>
-            </div>
-            <div class="chart-area">
-                <canvas id="solar-chart"></canvas>
-            </div>
-            <div class="chart-controls">
-                <button class="chart-btn active" data-chart="tegangan" data-type="solar">Tegangan</button>
-                <button class="chart-btn" data-chart="ampere" data-type="solar">Ampere</button>
-                <button class="chart-btn" data-chart="daya" data-type="solar">Daya</button>
-                <button class="chart-btn" data-chart="multi" data-type="solar">Multi</button>
-            </div>
-        </div>
-
-        <div class="chart-card">
-            <div class="chart-header">
-                <h2 class="chart-title">💨 Grafik Turbin Angin</h2>
-            </div>
-            <div class="chart-area">
-                <canvas id="turbine-chart"></canvas>
-            </div>
-            <div class="chart-controls">
-                <button class="chart-btn active" data-chart="tegangan" data-type="turbine">Tegangan</button>
-                <button class="chart-btn" data-chart="ampere" data-type="turbine">Ampere</button>
-                <button class="chart-btn" data-chart="daya" data-type="turbine">Daya</button>
-                <button class="chart-btn" data-chart="multi" data-type="turbine">Multi</button>
-            </div>
-        </div>
+    <!-- Alarm Panel -->
+    <div class="alarm-panel" id="alarm-panel">
+      <div class="alarm-panel-header">
+        <span class="alarm-panel-title">🚨 Riwayat Alarm Gerak</span>
+        <button class="alarm-panel-clear" onclick="clearAlarms()">Hapus Semua</button>
+      </div>
+      <div class="alarm-panel-list" id="alarm-panel-list">
+        <div class="alarm-empty">Belum ada alarm terdeteksi</div>
+      </div>
     </div>
 
-    <!-- Map Section -->
-    <div class="map-section">
-        <div class="map-container">
-            <div class="map-header">
-                <h2 class="map-title">📍 Lokasi GPS Real-time</h2>
-            </div>
-            <div id="map" class="map-area"></div>
-            <div class="coordinates">
-                <div class="coordinates-label">Koordinat</div>
-                <div class="coordinates-value">-7.2575° S, 112.7521° E</div>
-            </div>
-        </div>
+    <div class="nav-device-bar">
+      <div class="nav-device-info">
+        <div class="nav-device-dot"></div>
+        <span class="nav-device-label">Monitoring:</span>
+        <span class="nav-device-name" id="nav-device-name">— / —</span>
+      </div>
+      <button class="btn-switch" id="btn-switch">Ganti device</button>
     </div>
 
-    <!-- Log Section -->
-    <div class="log-section">
-        <div class="log-container">
-            <div class="log-header">
-                <h2 class="log-title">📋 Log Data Sistem</h2>
-            </div>
-            <div class="log-content">
-                <!-- Log entries will be dynamically added by JavaScript -->
-            </div>
-            <div class="log-footer">
-                <span class="log-count">Total Logs: 0 entries</span>
-                <div class="log-actions">
-                    <button class="log-btn primary">🔄 Refresh</button>
-                    <button class="log-btn secondary">💾 Export</button>
-                </div>
-            </div>
+    <div class="nav-menu">
+      <button class="nav-item active" data-section="panel">Panel</button>
+      <button class="nav-item" data-section="grafik">Grafik</button>
+      <button class="nav-item" data-section="gps">GPS</button>
+      <button class="nav-item" data-section="lampu">Lampu</button>
+      <button class="nav-item" data-section="log">Log</button>
+    </div>
+  </nav>
+
+  <div class="dash-content">
+
+    <!-- Panel Cards -->
+    <div class="panel-grid" id="section-panel">
+      <div class="panel-card solar">
+        <div class="panel-label solar">☀ Panel Surya</div>
+        <div class="panel-metrics">
+          <div class="metric-row">
+            <span class="metric-key">Tegangan</span>
+            <span class="metric-val solar" id="solar-v">0.00 V</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-key">Ampere</span>
+            <span class="metric-val solar" id="solar-a">0.00 A</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-key">Daya</span>
+            <span class="metric-val solar" id="solar-w">0.00 W</span>
+          </div>
         </div>
+      </div>
+      <div class="panel-card turbine">
+        <div class="panel-label turbine">💨 Turbin</div>
+        <div class="panel-metrics">
+          <div class="metric-row">
+            <span class="metric-key">Tegangan</span>
+            <span class="metric-val turbine" id="turbine-v">0.00 V</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-key">Ampere</span>
+            <span class="metric-val turbine" id="turbine-a">0.00 A</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-key">Daya</span>
+            <span class="metric-val turbine" id="turbine-w">0.00 W</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="footer-spacing"></div>
+    <!-- Charts -->
+    <div id="section-grafik">
+      <div class="chart-card" style="margin-bottom:12px">
+        <div class="chart-title">☀ Grafik Panel Surya</div>
+        <div class="chart-area"><canvas id="solar-chart"></canvas></div>
+        <div class="chart-btns">
+          <button class="chart-btn active" data-chart="tegangan" data-type="solar">Tegangan</button>
+          <button class="chart-btn" data-chart="ampere" data-type="solar">Ampere</button>
+          <button class="chart-btn" data-chart="daya" data-type="solar">Daya</button>
+          <button class="chart-btn" data-chart="multi" data-type="solar">Multi</button>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">💨 Grafik Turbin Angin</div>
+        <div class="chart-area"><canvas id="turbine-chart"></canvas></div>
+        <div class="chart-btns">
+          <button class="chart-btn active" data-chart="tegangan" data-type="turbine">Tegangan</button>
+          <button class="chart-btn" data-chart="ampere" data-type="turbine">Ampere</button>
+          <button class="chart-btn" data-chart="daya" data-type="turbine">Daya</button>
+          <button class="chart-btn" data-chart="multi" data-type="turbine">Multi</button>
+        </div>
+      </div>
+    </div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <!-- Chart.js Library CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    
-    <!-- Main JavaScript -->
-    <script src="script.js"></script>
+    <!-- Map -->
+    <div class="map-card" id="section-gps">
+      <div class="map-title-bar">📍 Lokasi GPS Real-time</div>
+      <div id="map"></div>
+      <div class="map-coords">
+        <div class="map-coords-label">Koordinat</div>
+        <div class="map-coords-val" id="map-coords">-7.2575° S, 112.7521° E</div>
+      </div>
+    </div>
+
+    <!-- Kontrol Lampu -->
+    <div class="lampu-card" id="section-lampu">
+      <div class="lampu-header">
+        <div class="lampu-title-text">💡 Kontrol Lampu</div>
+        <div class="lampu-live-badge">
+          <span class="lampu-live-dot" id="lampu-live-dot"></span>
+          <span id="lampu-live-label">Mati</span>
+        </div>
+      </div>
+
+      <div class="single-lampu-wrap">
+        <div class="single-lampu" id="single-lampu-btn" onclick="toggleLampu()">
+          <div class="single-lampu-glow"></div>
+          <div class="single-lampu-icon">
+            <svg viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="30" cy="28" rx="20" ry="22" fill="currentColor" opacity="0.18"/>
+              <path d="M14 30 Q10 18 20 10 Q30 2 40 10 Q50 18 46 30 Q44 40 38 46 L22 46 Q16 40 14 30Z" fill="currentColor" opacity="0.55"/>
+              <path d="M24 42 Q27 36 30 34 Q33 36 36 42" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.9"/>
+              <rect x="22" y="46" width="16" height="5" rx="2" fill="currentColor" opacity="0.6"/>
+              <rect x="23" y="52" width="14" height="4" rx="2" fill="currentColor" opacity="0.45"/>
+              <rect x="24" y="57" width="12" height="4" rx="2" fill="currentColor" opacity="0.3"/>
+            </svg>
+          </div>
+          <div class="single-lampu-label" id="single-lampu-label">MATI</div>
+        </div>
+        <div class="single-lampu-hint">Ketuk untuk toggle</div>
+      </div>
+
+      <div class="lampu-mode-tabs">
+        <button class="lampu-tab active" onclick="switchLampuMode('manual',this)">Manual</button>
+        <button class="lampu-tab" onclick="switchLampuMode('timer',this)">Timer</button>
+        <button class="lampu-tab" onclick="switchLampuMode('jadwal',this)">Jadwal</button>
+      </div>
+
+      <div class="lampu-panel active" id="lampu-panel-manual">
+        <div class="manual-btns">
+          <button class="btn-manual-on" id="btn-manual-on" onclick="setLampu(true,'manual','Tombol nyala')">⚡ Nyalakan</button>
+          <button class="btn-manual-off" id="btn-manual-off" onclick="setLampu(false,'manual','Tombol mati')">✕ Matikan</button>
+        </div>
+      </div>
+
+      <div class="lampu-panel" id="lampu-panel-timer">
+        <div class="timer-body">
+          <div class="timer-select-row">
+            <div class="form-field">
+              <label class="field-label">Aksi</label>
+              <select id="timer-action" class="field-input">
+                <option value="on">Nyalakan</option>
+                <option value="off">Matikan</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="field-label">Durasi (menit)</label>
+              <input type="number" id="timer-duration" class="field-input" value="5" min="1" max="1440"/>
+            </div>
+          </div>
+          <button class="btn-timer-start" onclick="startTimer()">▶ Jalankan Timer</button>
+          <div class="active-timers" id="active-timers"></div>
+        </div>
+      </div>
+
+      <div class="lampu-panel" id="lampu-panel-jadwal">
+        <div class="jadwal-body">
+          <div class="timer-select-row">
+            <div class="form-field">
+              <label class="field-label">Aksi</label>
+              <select id="jadwal-action" class="field-input">
+                <option value="on">Nyalakan</option>
+                <option value="off">Matikan</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="field-label">Jam</label>
+              <input type="time" id="jadwal-time" class="field-input" value="18:00"/>
+            </div>
+            <div class="form-field">
+              <label class="field-label">Hari</label>
+              <select id="jadwal-hari" class="field-input">
+                <option value="daily">Setiap Hari</option>
+                <option value="weekday">Sen–Jum</option>
+                <option value="weekend">Sab–Min</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-timer-start" onclick="addJadwal()">+ Tambah Jadwal</button>
+          <div class="active-timers" id="active-jadwals"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log -->
+    <div class="log-card" id="section-log">
+      <div class="log-header">
+        <div class="log-title-text">📋 Log Sistem</div>
+        <div class="log-count-badge" id="log-count">0 entri</div>
+      </div>
+      <div class="log-list" id="log-list"></div>
+      <div class="log-actions">
+        <button class="log-btn-primary" id="btn-refresh-log">🔄 Refresh</button>
+        <button class="log-btn-secondary" id="btn-export-log">💾 Export CSV</button>
+      </div>
+    </div>
+
+  </div><!-- /.dash-content -->
+</div><!-- /#page-dashboard -->
+
+<!-- Toast Notification -->
+<div id="toast-container"></div>
+
+<script src="app.js"></script>
 </body>
 </html>
