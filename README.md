@@ -1,358 +1,415 @@
-# ⚡ WATTSCOPE — IoT Energy Monitoring System
+# ⚡ PowerTrack by Terangin
 
-<p align="center">
-  <img src="https://img.shields.io/badge/ESP32-Firmware-blue?style=for-the-badge&logo=espressif" />
-  <img src="https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi" />
-  <img src="https://img.shields.io/badge/MQTT-HiveMQ_Cloud-purple?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Dashboard-Web_App-orange?style=for-the-badge" />
-</p>
-
-<p align="center">
-  Sistem monitoring energi terbarukan berbasis IoT secara <strong>real-time</strong>.<br/>
-  Memantau Panel Surya & Turbin Angin, GPS tracking, dan deteksi keamanan via MQTT.
-</p>
+Sistem monitoring energi terbarukan berbasis web secara real-time. Memantau panel surya dan turbin angin, mengontrol lampu, mendeteksi gerak, dan melacak lokasi GPS — semua dalam satu dashboard.
 
 ---
 
-## 📑 Daftar Isi
-
-- [Gambaran Umum](#-gambaran-umum)
-- [Arsitektur Sistem](#-arsitektur-sistem)
-- [Fitur](#-fitur)
-- [Komponen Hardware](#-komponen-hardware)
-- [Konfigurasi Pin ESP32](#-konfigurasi-pin-esp32)
-- [Struktur Proyek](#-struktur-proyek)
-- [Instalasi & Setup](#-instalasi--setup)
-  - [1. Firmware ESP32](#1-firmware-esp32)
-  - [2. Backend Server](#2-backend-server)
-  - [3. Web Dashboard](#3-web-dashboard)
-- [Konfigurasi MQTT](#-konfigurasi-mqtt)
-- [MQTT Topics](#-mqtt-topics)
-- [Kalibrasi Sensor](#-kalibrasi-sensor)
-- [Konsumsi Daya & Baterai](#-konsumsi-daya--baterai)
-- [Troubleshooting](#-troubleshooting)
-
----
-
-## 🔍 Gambaran Umum
-Proyek Integrated Smart Power & GPS Monitoring System ini bertujuan untuk menghadirkan solusi terpadu dalam pemantauan daya sekaligus peningkatan keamanan pada sistem energi terdistribusi. Sistem ini menggabungkan sensor daya untuk membaca arus, tegangan, serta estimasi konsumsi energi secara real-time, kemudian mengirimkan data tersebut ke platform monitoring berbasis IoT.
-Untuk aspek keamanan, perangkat dilengkapi modul GPS yang memungkinkan pelacakan lokasi secara kontinu sehingga mencegah pencurian atau pemindahan aset tanpa izin. Informasi daya, status keamanan, dan posisi perangkat divisualisasikan secara terpusat sehingga memudahkan pengguna dalam melakukan pengawasan, analisis performa, serta respons cepat terhadap potensi gangguan.
-Dengan integrasi ini, menghadirkan sistem energi yang lebih aman, efisien, dan mudah dikelola — mulai dari pemantauan performa Panel Surya dan Turbin Angin, hingga deteksi anomali keamanan berbasis sensor magnet secara real-time.
-
----
-
-## 🏗 Arsitektur Sistem
+## 📁 Struktur Project
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      ESP32 (Edge Device)                │
-│  ┌──────────┐  ┌──────────┐  ┌─────────┐  ┌─────────┐  │
-│  │FZ0430 x2 │  │ACS712 x2 │  │GPS Neo-6│  │ Magnet  │  │
-│  │(Tegangan)│  │  (Arus)  │  │         │  │ Sensor  │  │
-│  └────┬─────┘  └────┬─────┘  └────┬────┘  └────┬────┘  │
-│       └─────────────┴─────────────┴─────────────┘       │
-│                          │                              │
-│               ┌──────────▼──────────┐                   │
-│               │  SIM800L (Utama)    │                   │
-│               │  WiFi   (Fallback)  │                   │
-│               └──────────┬──────────┘                   │
-└──────────────────────────┼──────────────────────────────┘
-                           │ MQTT (TLS/SSL)
-                           ▼
-              ┌────────────────────────┐
-              │   HiveMQ Cloud Broker  │
-              └───────────┬────────────┘
-                          │ MQTT Subscribe
-                          ▼
-              ┌────────────────────────┐
-              │   FastAPI Backend      │
-              │   (Python + WebSocket) │
-              └───────────┬────────────┘
-                          │ WebSocket
-                          ▼
-              ┌────────────────────────┐
-              │   Web Dashboard        │
-              │   (HTML/CSS/JS)        │
-              └────────────────────────┘
+powertrack/
+├── index.html      # Struktur halaman (Login, Device Selector, Dashboard)
+├── style.css       # Seluruh styling — dark/light theme, animasi, layout
+├── app.js          # Logika frontend: MQTT topic, sensor, chart, map, lampu, alarm
+└── main.py         # Backend Flask: API endpoint, CSV storage, simulasi sensor
 ```
 
 ---
 
-## ✨ Fitur
+## 🚀 Cara Menjalankan
 
-| Fitur | Deskripsi |
-|---|---|
-| 📊 **Monitoring Real-time** | Data tegangan, arus, dan daya dari panel surya & turbin angin |
-| 📍 **GPS Tracking** | Lokasi perangkat ditampilkan di peta interaktif (Leaflet.js) |
-| 🔒 **Anti-Theft Detection** | Sensor magnet mendeteksi pintu terbuka dan mengirim alarm |
-| 📶 **Dual Connection** | SIM800L GPRS sebagai koneksi utama, WiFi sebagai fallback otomatis |
-| 📈 **Grafik Historis** | Visualisasi data dalam grafik real-time (Chart.js) |
-| 📋 **Activity Log** | Log semua aktivitas sistem dengan timestamp |
-| 🔄 **Auto Reconnect** | Sistem otomatis reconnect jika koneksi terputus |
-| 🔋 **Hemat Daya** | Desain untuk operasi baterai Li-Ion 3.7V |
+### Persyaratan
 
----
+- Python 3.8+
+- pip
 
-## 🔧 Komponen Hardware
+### Instalasi
 
-| Komponen | Spesifikasi | Fungsi |
-|---|---|---|
-| **ESP32** | DevKit v1 / v4 | Mikrokontroler utama |
-| **SIM800L** | GSM/GPRS Module | Koneksi internet utama (XL/AXIS) |
-| **GPS Module** | Neo-6M / Neo-7M | Pelacak lokasi real-time |
-| **Sensor Tegangan** | FZ0430 (maks 25V DC) | Baca tegangan solar & turbin |
-| **Sensor Arus** | ACS712-30A | Baca arus solar & turbin |
-| **Sensor Magnet** | Reed Switch / Hall Sensor | Deteksi keamanan pintu |
-| **Baterai** | Li-Ion 3.7V 2000mAh | Sumber daya portabel |
-| **Charger** | TP4056 (direkomendasikan) | Modul pengisian baterai |
-
----
-
-## 📌 Konfigurasi Pin ESP32
-
-```
-ESP32 GPIO   │  Komponen              │  Keterangan
-─────────────┼────────────────────────┼──────────────────────────
-GPIO 25      │  GPS TX                │  Data dari GPS ke ESP32
-GPIO 26      │  GPS RX                │  Data dari ESP32 ke GPS
-GPIO 16      │  SIM800L TX            │  Data dari SIM ke ESP32
-GPIO 17      │  SIM800L RX            │  Data dari ESP32 ke SIM
-GPIO 34      │  FZ0430 S1 (Solar)     │  Baca tegangan panel surya
-GPIO 35      │  FZ0430 S2 (Turbin)    │  Baca tegangan turbin angin
-GPIO 32      │  ACS712 S1 (Solar)     │  Baca arus panel surya
-GPIO 33      │  ACS712 S2 (Turbin)    │  Baca arus turbin angin
-GPIO 13      │  Sensor Magnet         │  Deteksi pintu (INPUT_PULLUP)
-```
-
-> ⚠️ **Perhatian:** GPIO 34 & 35 adalah **input-only**, tidak memiliki pull-up internal. Maksimal input 3.3V — pastikan tidak melebihi batas ini.
-
-> ⚠️ **SIM800L Power:** Membutuhkan arus hingga 2A saat transmisi. Gunakan power supply **3.7V–4.2V terpisah** (baterai Li-Ion), bukan dari pin 3.3V ESP32. Tambahkan kapasitor **1000µF** di jalur power SIM800L.
-
----
-
-## 📁 Struktur Proyek
-
-```
-wattscope/
-│
-├── firmware/
-│   └── wattscope_esp32.ino      # Firmware ESP32 (Arduino IDE)
-│
-├── backend/
-│   ├── main.py                  # FastAPI backend server
-│   └── requirements.txt         # Python dependencies
-│
-└── dashboard/
-    ├── index.html               # Halaman utama dashboard
-    ├── style.css                # Styling mobile-first
-    └── script.js                # Logic WebSocket & Chart.js
-```
-
----
-
-## 🚀 Instalasi & Setup
-
-### 1. Firmware ESP32
-
-**Persyaratan:**
-- Arduino IDE 2.x
-- ESP32 Board Package
-
-**Library yang dibutuhkan** (install via Library Manager):
-```
-TinyGPSPlus       by Mikal Hart
-ArduinoJson       by Benoit Blanchon  (v7)
-PubSubClient      by Nick O'Leary
-```
-
-**Langkah:**
-1. Buka `main.cpp` di Arduino IDE
-2. Sesuaikan kredensial WiFi fallback jika diperlukan:
-   ```cpp
-   const char* wifi_ssid     = "NAMA_WIFI_ANDA";
-   const char* wifi_password = "PASSWORD_WIFI";
-   ```
-3. Pastikan kartu SIM XL/AXIS aktif dan memiliki kuota data
-4. Upload ke ESP32 (Board: `ESP32 Dev Module`, Upload Speed: `115200`)
-5. Buka Serial Monitor pada baud rate **115200** untuk memonitor log
-
-**Urutan log normal saat boot:**
-```
-[ TAHAP 1 ] Mencoba SIM800L sebagai koneksi utama...
-✅ SIM800L merespons!
-✅ Terdaftar di jaringan!
-✅ GPRS Terhubung!
-✅ MQTT SIM800L terhubung!
-🎉 Koneksi utama: SIM800L aktif!
-🚀 Sistem siap!
-```
-
----
-
-### 2. Backend Server
-
-**Persyaratan:**
-- Python 3.9+
-
-**Instalasi:**
 ```bash
-# Clone repository
-git clone https://github.com/username/wattscope.git
-cd wattscope/backend
+pip install flask flask-cors
+```
 
-# Install dependencies
-pip install fastapi uvicorn paho-mqtt
+### Jalankan Server
 
-# Jalankan server
+```bash
 python main.py
 ```
 
-Server akan berjalan di:
-- **API:** `http://localhost:8000`
-- **WebSocket:** `ws://localhost:8000/ws`
-- **Docs:** `http://localhost:8000/docs`
+Server berjalan di `http://localhost:5000`
+
+### Akun Default
+
+| Username | Password | Role  |
+|----------|----------|-------|
+| admin    | admin123 | admin |
+| user     | user123  | user  |
 
 ---
 
-### 3. Web Dashboard
+## 🖥️ Halaman & Fitur
 
-Dashboard adalah aplikasi web statis, cukup buka file `index.html` di browser, atau jalankan via web server lokal:
+### 1. Login (`#page-login`)
 
-```bash
-cd wattscope/dashboard
+- Input username dan password
+- Validasi ke backend via `POST /api/login`
+- Username dan password disimpan di state untuk membangun MQTT topic
+- Mendukung dark / light theme (toggle di pojok kanan atas)
+- Enter pada field password langsung login
 
-# Menggunakan Python HTTP server
-python -m http.server 3000
+### 2. Device Selector (`#page-devices`)
+
+- Menampilkan daftar device yang tersedia dari `GET /api/devices`
+- Setiap device menampilkan preview MQTT topic lengkap:
+  ```
+  Terangin/{username}/{password}/{device_id}
+  ```
+- Badge status online / offline per device
+- Device baru ditandai badge "▸ baru terdeteksi"
+- Animasi scan aktif saat memuat device
+
+### 3. Dashboard (`#page-dashboard`)
+
+Dashboard utama dengan 5 section yang bisa dinavigasi:
+
+| Section | Konten |
+|---------|--------|
+| Panel   | Kartu metrik real-time Solar & Turbin |
+| Grafik  | Chart tegangan / ampere / daya (line chart interaktif) |
+| GPS     | Peta lokasi real-time (Leaflet + OpenStreetMap) |
+| Lampu   | Kontrol on/off dengan mode Manual, Timer, Jadwal |
+| Log     | Riwayat aktivitas sistem + export CSV |
+
+---
+
+## 📡 MQTT Topic & Payload
+
+### Format Topic
+
+```
+Terangin/{username}/{password}/{device}/{topicsensor}
 ```
 
-Lalu buka `http://localhost:3000` di browser.
-
-> 💡 Pastikan backend server sudah berjalan sebelum membuka dashboard agar WebSocket bisa terhubung.
+Kredensial username dan password berasal langsung dari form Login. Di tampilan UI, password disembunyikan sebagai `***`.
 
 ---
 
-## 📡 Konfigurasi MQTT
+### `/sensor` — Data Energi & GPS
 
-Proyek ini menggunakan **HiveMQ Cloud** sebagai broker MQTT dengan koneksi SSL/TLS.
+**Arah:** Server → Device | **Interval:** 2 detik
 
-| Parameter | Value |
-|---|---|
-| Broker | `9de252096f4146cb844e4b835206298f.s1.eu.hivemq.cloud` |
-| Port (TLS) | `8883` |
-| Port (Non-TLS) | `1883` |
-| Username | `Testlog` |
-| Password | `Test123456` |
-
-> 🔐 **Catatan Keamanan:** Ganti username dan password MQTT sebelum deployment ke lingkungan produksi. Kredensial di atas hanya untuk keperluan development/testing.
-
----
-
-## 📨 MQTT Topics
-
-| Topic | Publisher | Subscriber | Isi Data |
-|---|---|---|---|
-| `wattscope/sensor/solar` | ESP32 | Backend | `{voltage, ampere, power, timestamp}` |
-| `wattscope/sensor/turbine` | ESP32 | Backend | `{voltage, ampere, power, timestamp}` |
-| `wattscope/gps` | ESP32 | Backend | `{latitude, longitude, speed_kmh, satellites, valid, timestamp}` |
-| `wattscope/status` | ESP32 | Backend | `{online, active_conn, uptime, free_heap, gps_valid, door_alarm}` |
-| `wattscope/security` | ESP32 | Backend | `{event, alarm, message, timestamp}` |
-
-**Contoh payload `wattscope/sensor/solar`:**
 ```json
 {
-  "voltage": 12.45,
-  "ampere": 3.20,
-  "power": 39.84,
-  "active_conn": "SIM800L",
-  "timestamp": 3621
+  "solar":   { "v": 218.45, "a": 5.32,  "w": 1162.15 },
+  "turbine": { "v": 235.10, "a": 6.41,  "w": 1507.00 },
+  "gps":     { "lat": -7.2575, "lng": 112.7521 },
+  "ts": "2025-04-02T08:30:00"
 }
 ```
 
-**Contoh payload `wattscope/security` saat alarm:**
+| Field | Tipe | Keterangan |
+|-------|------|-----------|
+| `solar.v` | float | Tegangan panel surya (V) |
+| `solar.a` | float | Arus panel surya (A) |
+| `solar.w` | float | Daya panel surya (W) |
+| `turbine.v` | float | Tegangan turbin angin (V) |
+| `turbine.a` | float | Arus turbin angin (A) |
+| `turbine.w` | float | Daya turbin angin (W) |
+| `gps.lat` | float | Koordinat lintang (WGS84) |
+| `gps.lng` | float | Koordinat bujur (WGS84) |
+| `ts` | string ISO 8601 | Timestamp server |
+
+---
+
+### `/lampu` — Kontrol Lampu
+
+**Arah:** Dua arah (bidirectional) | **Interval:** On-demand
+
+**Server → Device** (perintah):
 ```json
 {
-  "event": "DOOR_OPENED",
-  "alarm": true,
-  "message": "Pintu terbuka - potensi pencurian!",
-  "active_conn": "SIM800L",
-  "timestamp": 5120
+  "on": true,
+  "mode": "manual",
+  "detail": "Tombol nyala",
+  "ts": "2025-04-02T08:30:00"
 }
 ```
 
----
+**Device → Server** (konfirmasi status):
+```json
+{
+  "on": true,
+  "mode": "manual",
+  "detail": "Tombol nyala",
+  "ts": "2025-04-02T08:30:00"
+}
+```
 
-## 🎛 Kalibrasi Sensor
+| Field | Tipe | Keterangan |
+|-------|------|-----------|
+| `on` | boolean | `true` = nyala, `false` = mati |
+| `mode` | string | `manual` \| `timer` \| `jadwal` |
+| `detail` | string | Deskripsi aksi (contoh: "Timer #1") |
+| `ts` | string ISO 8601 | Timestamp perintah / konfirmasi |
 
-### Sensor Tegangan FZ0430
+**Mode Kontrol Lampu:**
 
-Nilai default `VOLT_CALIBRATION = 7.576` adalah nilai teoritis (25V / 3.3V). Untuk hasil akurat, lakukan kalibrasi manual:
-
-1. Hubungkan sumber tegangan yang sudah diketahui nilainya
-2. Ukur tegangan nyata dengan multimeter
-3. Baca nilai yang ditampilkan ESP32 via Serial Monitor
-4. Hitung faktor baru: `faktor_baru = tegangan_multimeter / tegangan_terbaca`
-5. Update nilai di kode:
-   ```cpp
-   const float VOLT_CALIBRATION = 7.576; // Ganti dengan nilai hasil kalibrasi
-   ```
-
-### Sensor Arus ACS712-30A
-
-Nilai offset `ACS712_OFFSET = 1.65` bisa bergeser tergantung suplai VCC:
-
-1. Matikan semua beban (arus = 0)
-2. Baca nilai ADC dari pin sensor via Serial Monitor
-3. Konversi: `offset = (raw_adc / 4096.0) * 3.3`
-4. Update nilai di kode:
-   ```cpp
-   const float ACS712_OFFSET = 1.65; // Ganti dengan nilai hasil kalibrasi
-   ```
+- **Manual** — tombol nyala/mati langsung
+- **Timer** — set durasi menit, countdown otomatis eksekusi
+- **Jadwal** — set jam + hari (Setiap Hari / Sen–Jum / Sab–Min), cek setiap 10 detik
 
 ---
 
-## 🔋 Konsumsi Daya & Baterai
+### `/alarm` — Deteksi Gerak PIR
 
-Estimasi konsumsi sistem dalam operasi normal:
+**Arah:** Dua arah | **Interval:** 10 detik
 
-| Kondisi | Konsumsi |
-|---|---|
-| Semua aktif (transmit) | ~510 mA |
-| Idle antar siklus | ~43 mA |
-| Rata-rata per jam | ~277 mA |
+**Server → Device** (konfigurasi):
+```json
+{
+  "motion": true,
+  "sensitivity": "medium",
+  "ts": "2025-04-02T08:31:00"
+}
+```
 
-**Estimasi daya tahan baterai:**
+**Device → Server** (laporan deteksi):
+```json
+{
+  "armed": true,
+  "ts": "2025-04-02T08:31:00"
+}
+```
 
-| Kapasitas Baterai | Estimasi Daya Tahan |
-|---|---|
-| 1× 2000 mAh | ~4–5 jam |
-| 3× 2000 mAh (paralel, 6000 mAh) | ~13–15 jam |
-| 5× 2000 mAh (paralel, 10000 mAh) | ~24 jam+ |
+| Field | Tipe | Keterangan |
+|-------|------|-----------|
+| `motion` | boolean | `true` = gerak terdeteksi |
+| `sensitivity` | string | `low` \| `medium` \| `high` |
+| `armed` | boolean | `true` = alarm aktif / terpicu |
+| `ts` | string ISO 8601 | Timestamp deteksi |
 
-> 💡 **Tips hemat daya:** Implementasi deep sleep ESP32 dapat menurunkan konsumsi rata-rata ke ~50–70 mA, sehingga satu baterai 2000 mAh bisa bertahan hingga 28–40 jam.
-
----
-
-## 🔧 Troubleshooting
-
-| Masalah | Kemungkinan Penyebab | Solusi |
-|---|---|---|
-| SIM800L tidak merespons AT | Power supply tidak cukup | Gunakan power 3.7V–4.2V terpisah, tambah kapasitor 1000µF |
-| GPRS gagal konek | APN salah / sinyal lemah | Pastikan APN `internet` untuk XL/AXIS, pindah ke area sinyal lebih kuat |
-| GPS tidak valid | Posisi tertutup / cold fix | Pindah ke area terbuka, tunggu 1–3 menit untuk cold fix |
-| Arus terbaca saat tanpa beban | Offset ACS712 bergeser | Kalibrasi ulang `ACS712_OFFSET` |
-| MQTT terputus berkala | Keep-alive tidak jalan | Pastikan `mqttPingReq_SIM()` terpanggil tiap 30 detik |
-| Alarm magnet false positive | Jarak magnet terlalu jauh / getaran | Kurangi jarak antara magnet dan sensor (maks 1–2 cm) |
-| Dashboard tidak update | WebSocket tidak terhubung | Pastikan backend berjalan, cek URL WebSocket di `script.js` |
-| Tegangan terbaca tidak akurat | Kalibrasi belum dilakukan | Lakukan kalibrasi dengan multimeter |
+Saat alarm terpicu: bell icon bergetar, badge counter bertambah, toast notification muncul, dan entri log merah ditambahkan.
 
 ---
 
-## 📜 Lisensi
+### `/status` — Heartbeat Device
 
-Proyek ini dirilis di bawah lisensi [MIT License](LICENSE).
+**Arah:** Device → Server | **Interval:** 30 detik
+
+```json
+{
+  "online": true,
+  "uptime_s": 3600,
+  "rssi": -65,
+  "ts": "2025-04-02T08:30:00"
+}
+```
+
+| Field | Tipe | Keterangan |
+|-------|------|-----------|
+| `online` | boolean | Status koneksi device |
+| `uptime_s` | integer | Lama device menyala (detik) |
+| `rssi` | integer (dBm) | Kekuatan sinyal WiFi (negatif) |
+| `ts` | string ISO 8601 | Timestamp heartbeat |
 
 ---
 
-<p align="center">
-  Dibuat dengan ❤️ untuk monitoring energi terbarukan
-</p>
+## 🔌 API Endpoint (Backend)
+
+Base URL: `http://localhost:5000/api`
+
+| Endpoint | Method | Keterangan |
+|----------|--------|-----------|
+| `/login` | POST | Autentikasi user, cek dari `users.csv` |
+| `/devices` | GET | Daftar device beserta status online/offline |
+| `/sensor` | GET | Generate data sensor, simpan ke CSV, return payload `/sensor` |
+| `/sensor/history` | GET | Riwayat data sensor (`?limit=20`) |
+| `/sensor/export` | GET | Download `data_sensor.csv` |
+| `/lampu` | GET | Status lampu saat ini |
+| `/lampu` | POST | Kirim perintah lampu, terima payload format MQTT |
+| `/lampu/export` | GET | Download `lampu_log.csv` |
+| `/log` | GET | Riwayat log kontrol lampu (`?limit=50`) |
+| `/motion` | GET | Simulasi deteksi PIR, return payload `/alarm` |
+| `/motion/history` | GET | Riwayat deteksi gerak (`?limit=50`) |
+| `/status` | GET | Heartbeat device: uptime, RSSI, online |
+
+---
+
+## 🗄️ Penyimpanan Data (CSV)
+
+Semua data disimpan lokal dalam format CSV. File dibuat otomatis saat server pertama kali dijalankan.
+
+| File | Header | Keterangan |
+|------|--------|-----------|
+| `data_sensor.csv` | timestamp, solar_v, solar_a, solar_w, turbine_v, turbine_a, turbine_w, lat, lng | Data sensor setiap polling |
+| `lampu_log.csv` | timestamp, action, mode, detail, ts_mqtt | Riwayat kontrol lampu |
+| `users.csv` | username, password, role | Akun pengguna |
+| `motion_log.csv` | timestamp, detected, device | Riwayat deteksi gerak |
+
+---
+
+## 🎨 UI & Styling
+
+### Tema
+
+Mendukung **dark mode** (default) dan **light mode**. Toggle tersedia di semua halaman. Preferensi disimpan di `localStorage`.
+
+**Palet warna utama:**
+
+| Nama | Hex | Penggunaan |
+|------|-----|-----------|
+| Teal | `#0FD9BF` | Aksen utama, solar, border aktif |
+| Orange | `#FF4800` | Turbin, logo gradient |
+| Yellow | `#FFB800` | Daya, warning |
+| Dark | `#0A0F14` | Background utama |
+
+### Font
+
+- **DM Sans** — teks umum, label, body
+- **Space Mono** — nilai metrik, topic MQTT, kode
+
+### Animasi
+
+- `fadeUp` — card masuk saat pertama load
+- `pulse` — dot status online
+- `scan` — indikator scanning device
+- Bell shake saat alarm terpicu
+
+---
+
+## 📊 Grafik (Chart.js)
+
+Setiap sumber energi (Solar & Turbin) memiliki grafik terpisah dengan 4 mode tampilan:
+
+| Mode | Dataset | Warna |
+|------|---------|-------|
+| Tegangan | Volt (V) | Teal `#0FD9BF` |
+| Ampere | Ampere (A) | Green `#22c55e` |
+| Daya | Watt (W) | Yellow `#FFB800` |
+| Multi | V + A + W (dual axis) | Ketiganya |
+
+Maksimum **20 titik data** ditampilkan (FIFO). Update setiap 2 detik tanpa jeda animasi agar tidak patah-patah.
+
+---
+
+## 🗺️ GPS (Leaflet)
+
+- Peta OpenStreetMap via Leaflet.js
+- Marker custom dengan warna teal + glow effect
+- Lingkaran radius 60 meter di sekitar posisi device
+- Popup menampilkan MQTT topic device
+- Koordinat diperbarui setiap polling sensor
+
+---
+
+## 🔧 Implementasi Frontend (app.js)
+
+### State Utama
+
+```js
+const state = {
+  username: '',         // dari form login
+  password: '',         // dari form login — digunakan untuk MQTT topic
+  selectedDevice: null,
+  devices: [],
+  solarData:   { v:[], a:[], w:[], t:[] },
+  turbineData: { v:[], a:[], w:[], t:[] },
+  interval: null,        // polling sensor  — 2 detik
+  motionInterval: null,  // polling alarm   — 10 detik
+  statusInterval: null,  // polling status  — 30 detik
+  alarms: []
+};
+```
+
+### Helper MQTT Topic
+
+```js
+function mqttTopic(topicSensor) {
+  const dev = state.selectedDevice || '—';
+  return `Terangin/${state.username}/${state.password}/${dev}/${topicSensor}`;
+}
+```
+
+Semua referensi topic di seluruh kode menggunakan fungsi ini. Perubahan format topic cukup dilakukan di satu tempat.
+
+### Interval Polling
+
+| Fungsi | Interval | Topic |
+|--------|----------|-------|
+| `fetchSensor()` | 2 detik | `/sensor` |
+| `fetchMotion()` | 10 detik | `/alarm` |
+| `publishStatus()` | 30 detik | `/status` |
+
+Semua interval dibersihkan (`clearInterval`) saat logout atau pindah device.
+
+---
+
+## 📋 Log Sistem
+
+Log ditampilkan di section **Log** pada dashboard. Setiap entri memiliki warna:
+
+| Warna | Arti |
+|-------|------|
+| 🟢 Green | Data sensor masuk, lampu nyala, koneksi berhasil |
+| 🔵 Blue | Info: inisialisasi, export, heartbeat status |
+| 🟡 Yellow | Lampu dimatikan |
+| 🔴 Red | Error, gagal koneksi, alarm gerak terdeteksi |
+
+Maksimum 100 entri disimpan di memory, 50 ditampilkan di UI.
+
+---
+
+## 🚨 Sistem Alarm
+
+1. `fetchMotion()` polling `/api/motion` setiap 10 detik
+2. Jika `detected: true`, fungsi `triggerAlarm()` dipanggil
+3. Bell icon di navbar bergetar + badge counter bertambah
+4. Toast notification muncul 4 detik di pojok layar
+5. Log merah ditambahkan ke riwayat
+6. Panel alarm menampilkan riwayat semua deteksi
+7. Semua alarm bisa dihapus dengan tombol "Hapus Semua"
+
+---
+
+## 📦 Dependensi
+
+### Frontend (CDN)
+
+| Library | Versi | Fungsi |
+|---------|-------|--------|
+| Leaflet.js | 1.9.4 | Peta GPS interaktif |
+| Chart.js | 4.4.1 | Grafik data sensor |
+| Google Fonts | — | DM Sans, Space Mono |
+
+### Backend (Python)
+
+| Package | Fungsi |
+|---------|--------|
+| `flask` | Web framework & API server |
+| `flask-cors` | Cross-Origin Resource Sharing |
+| `csv` | Baca/tulis file CSV (built-in) |
+| `random` | Simulasi data sensor & PIR |
+| `datetime` | Timestamp ISO 8601 |
+
+---
+
+## 📝 Changelog
+
+### v2.0 — Pembaruan MQTT
+- Format topic diubah: `Terangin/{username}/{password}/{device}/{topic}`
+- Username & password dikonfigurasi dari halaman Login (tidak hardcode)
+- Semua payload ditambah field `ts` format ISO 8601
+- Endpoint `/api/status` ditambahkan untuk heartbeat device
+- Response `/api/motion` diperbarui sesuai payload `/alarm` Device→Server
+- Response `/api/sensor` ditambah field `ts` ISO 8601
+- `lampu_log.csv` ditambah kolom `ts_mqtt`
+- Fungsi terpusat `mqttTopic()` di `app.js`
+- Interval polling `/status` setiap 30 detik dengan auto-cleanup saat logout
+
+### v1.0 — Rilis Awal
+- Dashboard monitoring solar, turbin, GPS, lampu, alarm
+- Format topic awal: `wattscope/{username}/{device}`
+- Tema dark/light, multi-chart, timer, jadwal
+
+---
+
+> **PowerTrack by Terangin** — Monitoring energi terbarukan, real-time, di genggaman tangan.
